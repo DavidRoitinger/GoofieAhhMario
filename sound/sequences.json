@@ -22,6 +22,9 @@
     "03_level_grass": [
         "22"
     ],
+    "04_level_inside_castle": [
+        "0E"
+    ],
     "05_level_water": [
         "13"
     ],
@@ -119,11 +122,5 @@
         "banks": [
             "1B"
         ]
-    },
-    "04_level_inside_castle": [
-        "stone_cold_toad"
-    ],
-    "23_parry_": [
-        "parry_"
-    ]
+    }
 }
