@@ -679,37 +679,39 @@ void custom_hud(){
     //                 (0 + HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, fuck << 6, fuck << 3);
     // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
-    // handle_stick_movement(&player, MOVE_SPEED);
-    // // draw_render_demo();
+    handle_stick_movement(&player, MOVE_SPEED);
+    // draw_render_demo();
 
-    // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-    // add_texture(2);
-    // render_tile_sized(0, 0, WIDTH, HEIGHT);
-    // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+    draw_3d_render();
+}
 
-    // for (int i = 0; i < FOV / SLICE_SIZE; i++){
-    //     s32 angle = player.angleInDegrees + FOV/-2 + (i * SLICE_SIZE);
-	//     castRay(player.pos, angle, grid, &ray);
+void draw_3d_render(){
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    add_texture(2);
+    render_tile_sized(0, 0, WIDTH, HEIGHT);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+    for (int i = 0; i < FOV / SLICE_SIZE; i++){
+        s32 angle = player.angleInDegrees + FOV/-2 + (i * SLICE_SIZE);
+	    castRay(player.pos, angle, grid, &ray);
         
-    //     if(ray.hit){
-    //         ray.distance *= coss(degrees_to_angle(player.angleInDegrees - angle));
+        if(ray.hit){
+            ray.distance *= coss(degrees_to_angle(player.angleInDegrees - angle));
 
-    //         f32 wallHeight = (TILE_SIZE * HEIGHT) / ray.distance;
-    //         if(wallHeight > HEIGHT){
-    //             wallHeight = HEIGHT;
-    //         }
+            f32 wallHeight = (TILE_SIZE * HEIGHT) / ray.distance;
+            if(wallHeight > HEIGHT){
+                wallHeight = HEIGHT;
+            }
 
-    //         f32 wallOffset = HEIGHT / 2.0f - wallHeight / 2.0f;
+            f32 wallOffset = HEIGHT / 2.0f - wallHeight / 2.0f;
 
-    //         gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-    //         add_texture(1);
-    //         render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
-    //         // render_tile_cords((WIDTH / (FOV / SLICE_SIZE)) * i, (HEIGHT/2) + 25 * (ray.distance/10), (WIDTH / (FOV / SLICE_SIZE)) * (i + 1), (HEIGHT/2) - 25 * (ray.distance/10));
-    //         gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
-    //     }
-    // }
-
-
+            gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+            add_texture(1);
+            render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
+            // render_tile_cords((WIDTH / (FOV / SLICE_SIZE)) * i, (HEIGHT/2) + 25 * (ray.distance/10), (WIDTH / (FOV / SLICE_SIZE)) * (i + 1), (HEIGHT/2) - 25 * (ray.distance/10));
+            gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+        }
+    }
 }
 
 void draw_render_demo(){

@@ -60,6 +60,7 @@ struct Ray {
 };
 
 void custom_hud();
+void draw_3d_render();
 void draw_render_demo();
 
 void draw_entity(struct Entity *entity);
