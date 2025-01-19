@@ -651,7 +651,7 @@ const f32 TURN_SPEED = 3.0f;
 const f32 MOVE_SPEED = 1.0f;
 const f32 PI = 3.141592653589793f;
 const s32 FOV = 80;
-const f32 SLICE_SIZE = 1.0f;
+const f32 SLICE_SIZE = 0.5f;
 const s32 NUM_RAYS = FOV / SLICE_SIZE;
 const s32 COLUMN_WIDTH = WIDTH / (f32) NUM_RAYS;
 
@@ -707,22 +707,22 @@ void draw_3d_render(){
         s32 angle = player.angleInDegrees + FOV/-2 + (i * SLICE_SIZE);
 	    castRay(player.pos, angle, grid, &ray, i);
         
-        if(ray.hit){
-            ray.distance *= coss(degrees_to_angle(player.angleInDegrees - angle));
+        // if(ray.hit){
+        //     ray.distance *= coss(degrees_to_angle(player.angleInDegrees - angle));
 
-            f32 wallHeight = (TILE_SIZE * HEIGHT) / ray.distance;
-            if(wallHeight > HEIGHT){
-                wallHeight = HEIGHT;
-            }
+        //     f32 wallHeight = (TILE_SIZE * HEIGHT) / ray.distance;
+        //     if(wallHeight > HEIGHT){
+        //         wallHeight = HEIGHT;
+        //     }
 
-            f32 wallOffset = HEIGHT / 2.0f - wallHeight / 2.0f;
+        //     f32 wallOffset = HEIGHT / 2.0f - wallHeight / 2.0f;
 
-            gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-            add_texture(WALL);
-            render_tile_sized((COLUMN_WIDTH) * i, wallOffset, COLUMN_WIDTH, wallHeight);
-            // render_tile_cords((WIDTH / (FOV / SLICE_SIZE)) * i, (HEIGHT/2) + 25 * (ray.distance/10), (WIDTH / (FOV / SLICE_SIZE)) * (i + 1), (HEIGHT/2) - 25 * (ray.distance/10));
-            gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
-        }
+        //     gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+        //     add_texture(WALL);
+        //     render_tile_sized((COLUMN_WIDTH) * i, wallOffset, COLUMN_WIDTH, wallHeight);
+        //     // render_tile_cords((WIDTH / (FOV / SLICE_SIZE)) * i, (HEIGHT/2) + 25 * (ray.distance/10), (WIDTH / (FOV / SLICE_SIZE)) * (i + 1), (HEIGHT/2) - 25 * (ray.distance/10));
+        //     gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+        // }
     }
 }
 
@@ -1065,12 +1065,12 @@ void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE]
 
         if (mapY < MAP_SIZE && mapX < MAP_SIZE) {
 
-            draw_floor_tile(sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
-                (hRayPos[1] - start[1]) * (hRayPos[1] - start[1])),
-                player.angleInDegrees, grid[mapY][mapX], slice_index);
+            // draw_floor_tile(sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
+            //     (hRayPos[1] - start[1]) * (hRayPos[1] - start[1])),
+            //     player.angleInDegrees, grid[mapY][mapX], slice_index);
             posStackIndex++;
-            posStack[posStackIndex].dist = sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
-                                (vRayPos[1] - start[1]) * (vRayPos[1] - start[1]));
+            posStack[posStackIndex].dist = sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
+                (hRayPos[1] - start[1]) * (hRayPos[1] - start[1]));
             posStack[posStackIndex].x = mapX;
             posStack[posStackIndex].y = mapY;
 
