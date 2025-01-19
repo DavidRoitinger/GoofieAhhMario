@@ -628,20 +628,20 @@ void render_hud(void) {
 // ----- EDIT
 
 s32 grid[10][10] = {
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-    {1, 0, 1, 0, 1, 0, 1, 1, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 0, 1, 0, 1, 0, 1},
-    {1, 0, 0, 1, 0, 1, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 1, 0, 1, 1, 1},
-    {1, 0, 1, 1, 1, 1, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+    {11, 12, 10, 12, 11, 14, 10, 14, 10, 11},
+    {11, 10, 11, 10, 11, 10, 11, 11, 13, 11},
+    {11, 12, 10, 12, 13, 10, 10, 10, 10, 11},
+    {11, 11, 11, 11, 10, 11, 12, 11, 13, 11},
+    {11, 10, 14, 11, 12, 11, 10, 13, 10, 11},
+    {11, 14, 10, 12, 10, 11, 12, 11, 11, 11},
+    {11, 10, 11, 11, 11, 11, 10, 10, 14, 11},
+    {11, 13, 10, 12, 10, 12, 10, 13, 10, 11},
+    {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
     };
 
 const s32 MAP_SIZE = 10;
-
+const s32 WALL = 11;
 struct Entity enemyList[100];
 
 const s32 HEIGHT = 240; // 224?
@@ -650,7 +650,7 @@ const s32 TILE_SIZE = 16;
 const f32 TURN_SPEED = 3.0f;
 const f32 MOVE_SPEED = 1.0f;
 const f32 PI = 3.141592653589793f;
-const s32 FOV = 60;
+const s32 FOV = 80;
 const f32 SLICE_SIZE = 1.0f;
 const s32 NUM_RAYS = FOV / SLICE_SIZE;
 const s32 COLUMN_WIDTH = WIDTH / (f32) NUM_RAYS;
@@ -664,7 +664,7 @@ f32 angleInDegrees = 0.0f;
 
 struct Ray ray = {.hitPosition = {0.0f, 0.0f, 0.0f}, .distance=0.0f, .hit=FALSE};
 
-struct Entity player = { .spriteIndex = 5, .pos={24.0f, 24.0f, 0.0f}, .angleInDegrees = 0.0f};
+struct Entity player = { .spriteIndex = 1, .pos={24.0f, 24.0f, 0.0f}, .angleInDegrees = 0.0f};
 
 char buffer[100];
 
@@ -679,21 +679,33 @@ void custom_hud(){
     //                 (0 + HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, fuck << 6, fuck << 3);
     // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
+
+    // create_dl_ortho_matrix();
+    // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    // gDPSetCombineMode(gDisplayListHead++, G_CC_MODULATERGB, G_CC_MODULATERGB);
+    // gDPSetEnvColor(gDisplayListHead++, 255, 0, 0, 255); // Set color to red
+    // add_texture(4);
+    // render_tile(100, 100);
+    // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+
+
+ 
+
+
     handle_stick_movement(&player, MOVE_SPEED);
-    // draw_render_demo();
+    //draw_render_demo();
 
     draw_3d_render();
+
+
+
 }
 
 void draw_3d_render(){
-    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-    add_texture(2);
-    render_tile_sized(0, 0, WIDTH, HEIGHT);
-    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
-
-    for (int i = 0; i < FOV / SLICE_SIZE; i++){
+    for (s32 i = 0; i < FOV / SLICE_SIZE; i++){
         s32 angle = player.angleInDegrees + FOV/-2 + (i * SLICE_SIZE);
-	    castRay(player.pos, angle, grid, &ray);
+	    castRay(player.pos, angle, grid, &ray, i);
         
         if(ray.hit){
             ray.distance *= coss(degrees_to_angle(player.angleInDegrees - angle));
@@ -706,8 +718,8 @@ void draw_3d_render(){
             f32 wallOffset = HEIGHT / 2.0f - wallHeight / 2.0f;
 
             gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-            add_texture(1);
-            render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
+            add_texture(WALL);
+            render_tile_sized((COLUMN_WIDTH) * i, wallOffset, COLUMN_WIDTH, wallHeight);
             // render_tile_cords((WIDTH / (FOV / SLICE_SIZE)) * i, (HEIGHT/2) + 25 * (ray.distance/10), (WIDTH / (FOV / SLICE_SIZE)) * (i + 1), (HEIGHT/2) - 25 * (ray.distance/10));
             gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
         }
@@ -719,7 +731,7 @@ void draw_render_demo(){
     Vec3f tilePos;
     for (int i = 0; i < (int)(sizeof(grid) / sizeof(grid[0])); i++) {
         for (int j = 0; j < (int)(sizeof(grid[0]) / sizeof(grid[0][0])); j++) {
-            add_texture(grid[i][j] == 1 ? 2 : 1);
+            add_texture(grid[i][j]);
             vec3f_set(tilePos, 8 + (j * TILE_SIZE), 0, 8 + i * TILE_SIZE);
             render_tile(tilePos[0], tilePos[2]);
         }
@@ -727,10 +739,14 @@ void draw_render_demo(){
     gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
     for (int i = FOV/-2; i < FOV; i+= SLICE_SIZE){
-	    castRay(player.pos, player.angleInDegrees + i, grid, &ray);
+	    castRay(player.pos, player.angleInDegrees + i, grid, &ray, i);
 
         gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-        add_texture(6);
+        if(ray.hit){
+            add_texture(2);
+        }else{
+            add_texture(3);
+        }
         render_tile(ray.hitPosition[0], ray.hitPosition[1]);
         gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
     }
@@ -902,24 +918,83 @@ void handle_stick_movement(struct Entity *entity, f32 velocity){
     // sprintf(buffer, "%.1f %.1f", rotVec[0], rotVec[1]);
     // print_text(0, 40, buffer);
 
+
+    f32 newX = entity->pos[0] + rotVec[0];
+    f32 newY = entity->pos[1] + rotVec[1];
+
+    
+    s32 gridX = (s32)(newX / TILE_SIZE); 
+    s32 gridY = (s32)(newY / TILE_SIZE);
+
+    rotVec[0] = grid[gridY][gridX] == WALL ? 0 : rotVec[0];
+    rotVec[1] = grid[gridY][gridX] == WALL ? 0 : rotVec[1];
+
     vec3f_sum(entity->pos, entity->pos, rotVec);
     
+}
+
+void draw_floor_tile(f32 distance, f32 angleInDegrees, s32 texture, s32 i){
+
+    s32 angle = angleInDegrees + FOV/-2 + (i * SLICE_SIZE);
+
+
+    distance *= coss(degrees_to_angle(angleInDegrees - angle));
+
+    f32 wallHeight = (TILE_SIZE * HEIGHT) / distance;
+    if(wallHeight > HEIGHT){
+        wallHeight = HEIGHT;
+    }
+
+    f32 wallOffset = HEIGHT / 2.0f - wallHeight / 2.0f;
+
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    add_texture(texture);
+    render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+    
+}
+
+void selectionSort(struct Pos arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int min = i;
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j].dist < arr[min].dist)
+                min = j;
+        }
+       if (min != i) {
+            struct Pos temp = arr[min];
+            arr[min] = arr[i];
+            arr[i] = temp;
+        }
+    }
 }
 
 f32 floor(f32 f){
     return (f32)(s32)f;
 }
 
+const s32 posStackSize = 32;
+struct Pos posStack[32];
+s32 posStackIndex = 0;
 
 const s32 MAX_RAYCAST_DEPTH = 16;
 
-void castRay(Vec3f start, float angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE], struct Ray *ray){
+void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE], struct Ray *ray, s32 slice_index){
     s16 angle = degrees_to_angle(angleInDegrees);
     float vtan = -tans(angle), htan = -1.0f / tans(angle);
     float cellSize = 16;
-
     Bool8 hit = FALSE;
     s32 vdof = 0, hdof = 0;
+
+    posStackIndex = 0;
+
+    for (s32 i = 0; i < 32; i++) {
+        posStack[i].hit = FALSE;
+        posStack[i].dist = (float) S32_MAX;
+        posStack[i].x = 0;
+        posStack[i].y = 0;
+    }
+    
     float vdist = (float) S32_MAX;
     float hdist = (float) S32_MAX;
 
@@ -943,62 +1018,93 @@ void castRay(Vec3f start, float angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZ
     for (; vdof < MAX_RAYCAST_DEPTH; vdof++) {
         int mapX = (int)(vRayPos[0] / cellSize);
         int mapY = (int)(vRayPos[1] / cellSize);
-        // if (mapY < (int)(sizeof(grid) / sizeof(grid[0])) && mapX <  (int)(sizeof(grid[mapY]) / sizeof(grid[mapY][0])) && grid[mapY][mapX] != 0) {
-        if (mapY < MAP_SIZE && mapX < MAP_SIZE && grid[mapY][mapX] != 0) {
-            hit = TRUE;
-            vdist = sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
+
+        if (mapY < MAP_SIZE && mapX < MAP_SIZE) {
+
+            // draw_floor_tile(sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
+            //                 (vRayPos[1] - start[1]) * (vRayPos[1] - start[1])),
+            //                 player.angleInDegrees, grid[mapY][mapX], slice_index);
+            posStackIndex++;
+            posStack[posStackIndex].dist = sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
                                 (vRayPos[1] - start[1]) * (vRayPos[1] - start[1]));
-            break;
+            posStack[posStackIndex].x = mapX;
+            posStack[posStackIndex].y = mapY;
+
+            if (grid[mapY][mapX] == WALL){ 
+                hit = TRUE;
+                posStack[posStackIndex].hit = TRUE;
+                vdist = sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
+                                    (vRayPos[1] - start[1]) * (vRayPos[1] - start[1]));
+                break;
+            }else{
+                posStack[posStackIndex].hit = FALSE;
+            }
         }
         vRayPos[0] += offset[0];
         vRayPos[1] += offset[1];
     }
     
-
-    // vRayPos[0] += offset[0];
-    // vRayPos[1] += offset[1];
-    // hit = TRUE;
-    // vdist = sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
-    //                 (vRayPos[1] - start[1]) * (vRayPos[1] - start[1]));
-
     
     if (sins(angle) > 0.001f) {
-    hRayPos[1] = floor(start[1] / cellSize) * cellSize + cellSize;
-    hRayPos[0] = (start[1] - hRayPos[1]) * htan + start[0];
-    offset[1] = cellSize;
-    offset[0] = -offset[1] * htan;
-  } else if (sins(angle) < -0.001f) {
-    hRayPos[1] = floor(start[1] / cellSize) * cellSize - 0.01f;
-    hRayPos[0] = (start[1] - hRayPos[1]) * htan + start[0];
-    offset[1] = -cellSize;
-    offset[0] = -offset[1] * htan;
-  } else {
-    hdof = MAX_RAYCAST_DEPTH;
-  }
-
-  for (; hdof < MAX_RAYCAST_DEPTH; hdof++) {
-    int mapX = (int)(hRayPos[0] / cellSize);
-    int mapY = (int)(hRayPos[1] / cellSize);
-    // if (mapY < grid.size() && mapX < grid[mapY].size() && grid[mapY][mapX]) {
-    if (mapY < MAP_SIZE && mapX < MAP_SIZE && grid[mapY][mapX] != 0) {
-      hit = TRUE;
-      hdist = sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
-                        (hRayPos[1] - start[1]) * (hRayPos[1] - start[1]));
-      break;
+        hRayPos[1] = floor(start[1] / cellSize) * cellSize + cellSize;
+        hRayPos[0] = (start[1] - hRayPos[1]) * htan + start[0];
+        offset[1] = cellSize;
+        offset[0] = -offset[1] * htan;
+    } else if (sins(angle) < -0.001f) {
+        hRayPos[1] = floor(start[1] / cellSize) * cellSize - 0.01f;
+        hRayPos[0] = (start[1] - hRayPos[1]) * htan + start[0];
+        offset[1] = -cellSize;
+        offset[0] = -offset[1] * htan;
+    } else {
+        hdof = MAX_RAYCAST_DEPTH;
     }
-    hRayPos[0] += offset[0];
-    hRayPos[1] += offset[1];
-  }
 
+    for (; hdof < MAX_RAYCAST_DEPTH; hdof++) {
+        int mapX = (int)(hRayPos[0] / cellSize);
+        int mapY = (int)(hRayPos[1] / cellSize);
 
-    // hRayPos[0] += offset[0];
-    // hRayPos[1] += offset[1];
-    // hit = TRUE;
-    // hdist = sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
-    //                 (hRayPos[1] - start[1]) * (hRayPos[1] - start[1]));
+        if (mapY < MAP_SIZE && mapX < MAP_SIZE) {
 
-    // sprintf(buffer, "off %.1f %.1f", hRayPos[0], hRayPos[1]);
-    // print_text(100, 60, buffer);
+            draw_floor_tile(sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
+                (hRayPos[1] - start[1]) * (hRayPos[1] - start[1])),
+                player.angleInDegrees, grid[mapY][mapX], slice_index);
+            posStackIndex++;
+            posStack[posStackIndex].dist = sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
+                                (vRayPos[1] - start[1]) * (vRayPos[1] - start[1]));
+            posStack[posStackIndex].x = mapX;
+            posStack[posStackIndex].y = mapY;
+
+            if(grid[mapY][mapX] == WALL){
+                posStack[posStackIndex].hit = TRUE;
+                hit = TRUE;
+                hdist = sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
+                    (hRayPos[1] - start[1]) * (hRayPos[1] - start[1]));
+                break;
+            }else {
+                    posStack[posStackIndex].hit = FALSE;
+            }
+        }
+        hRayPos[0] += offset[0];
+        hRayPos[1] += offset[1];
+    }
+
+    selectionSort(posStack, 32);
+
+    for (s32 i = 0; i <= posStackIndex; i++)
+    {
+        draw_floor_tile(posStack[i].dist, player.angleInDegrees, 
+            grid[posStack[i].y][posStack[i].x], slice_index);
+        if(posStack[i].hit){
+            break;
+        }
+    }
+
+        // draw_floor_tile(posStack[0].dist, player.angleInDegrees, 
+        //     grid[posStack[0].y][posStack[0].x], slice_index);
+        // draw_floor_tile(posStack[1].dist, player.angleInDegrees, 
+        //     grid[posStack[1].y][posStack[1].x], slice_index);
+
+    
 
     if (hdist < vdist){
         ray->hitPosition[0] = hRayPos[0];
@@ -1012,6 +1118,205 @@ void castRay(Vec3f start, float angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZ
     ray->distance = MIN(hdist, vdist);
     ray->hit = hit;
 }
+
+
+
+// void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE], struct Ray *ray, s32 i){
+
+    
+//     s16 angle = degrees_to_angle(angleInDegrees);
+//     float vtan = -tans(angle), htan = -1.0f / tans(angle);
+//     float cellSize = 16;
+//     Bool8 hit = FALSE;
+//     Bool8 vHit = FALSE;
+//     Bool8 hHit = FALSE;
+//     s32 vdof = 0, hdof = 0;
+//     float vdist = (float) S32_MAX;
+//     float hdist = (float) S32_MAX;
+
+//     Vec3f vRayPos, hRayPos, vOffset, hOffset;
+
+//     if (coss(angle) > 0.001f) {
+//         vRayPos[0] = floor(start[0] / cellSize) * cellSize + cellSize;
+//         vRayPos[1] = (start[0] - vRayPos[0]) * vtan + start[1];
+//         vOffset[0] = cellSize;
+//         vOffset[1] = -vOffset[0] * vtan;
+//     } else if (coss(angle) < -0.001f) {
+//         vRayPos[0] = floor(start[0] / cellSize) * cellSize - 0.01f;
+//         vRayPos[1] = (start[0] - vRayPos[0]) * vtan + start[1];
+//         vOffset[0] = -cellSize;
+//         vOffset[1] = -vOffset[0] * vtan;
+//     } else {
+//         vdof = MAX_RAYCAST_DEPTH;
+//     }
+
+//     if (sins(angle) > 0.001f) {
+//     hRayPos[1] = floor(start[1] / cellSize) * cellSize + cellSize;
+//     hRayPos[0] = (start[1] - hRayPos[1]) * htan + start[0];
+//     hOffset[1] = cellSize;
+//     hOffset[0] = -hOffset[1] * htan;
+//   } else if (sins(angle) < -0.001f) {
+//     hRayPos[1] = floor(start[1] / cellSize) * cellSize - 0.01f;
+//     hRayPos[0] = (start[1] - hRayPos[1]) * htan + start[0];
+//     hOffset[1] = -cellSize;
+//     hOffset[0] = -hOffset[1] * htan;
+//   } else {
+//     hdof = MAX_RAYCAST_DEPTH;
+//   }
+
+
+//     for (int d = 0; d < MAX_RAYCAST_DEPTH; d++) {
+
+//         gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+//         add_texture(7);
+//         render_tile(vRayPos[0], vRayPos[1]);
+//         gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+//         gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+//         add_texture(7);
+//         render_tile(hRayPos[0], hRayPos[1]);
+//         gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+//         if(!vHit){
+//             int vMapX = (int)(vRayPos[0] / cellSize);
+//             int vMapY = (int)(vRayPos[1] / cellSize);
+
+//             if (vMapY >= 0 && vMapX >= 0 && vMapY < MAP_SIZE && vMapX < MAP_SIZE && vdof < MAX_RAYCAST_DEPTH) {
+
+//                 // draw_floor_tile(sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
+//                 //                 (vRayPos[1] - start[1]) * (vRayPos[1] - start[1])),
+//                 //                 player.angleInDegrees, grid[vMapY][vMapX], i);
+
+//                 if (grid[vMapY][vMapX] != 0){ 
+//                     vHit = TRUE;
+//                     // break;
+//                 }else {
+//                     vRayPos[0] += vOffset[0];
+//                     vRayPos[1] += vOffset[1];
+//                     vdist = sqrtf((vRayPos[0] - start[0]) * (vRayPos[0] - start[0]) +
+//                         (vRayPos[1] - start[1]) * (vRayPos[1] - start[1]));
+//                 }
+
+
+//             }else {
+//                 vdist = (float) S32_MAX;
+//                 vdof = MAX_RAYCAST_DEPTH;
+//             }
+//         }
+//         if(!hHit){
+//             int hMapX = (int)(hRayPos[0] / cellSize);
+//             int hMapY = (int)(hRayPos[1] / cellSize);
+
+//             if (hMapY >= 0 && hMapX >= 0 && hMapY < MAP_SIZE && hMapX < MAP_SIZE && hdof < MAX_RAYCAST_DEPTH) {
+
+//                 // draw_floor_tile(sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
+//                 //     (hRayPos[1] - start[1]) * (hRayPos[1] - start[1])),
+//                 //     player.angleInDegrees, grid[hMapY][hMapX], i);
+
+//                 if(grid[hMapY][hMapX] != 0){
+//                     hHit = TRUE;
+//                     // break;
+//                 }else {
+//                     hRayPos[0] += hOffset[0];
+//                     hRayPos[1] += hOffset[1];
+//                     hdist = sqrtf((hRayPos[0] - start[0]) * (hRayPos[0] - start[0]) +
+//                         (hRayPos[1] - start[1]) * (hRayPos[1] - start[1]));
+//                 }
+                
+
+//             }else {
+//                 vdist = (float) S32_MAX;
+//                 hdof = MAX_RAYCAST_DEPTH;
+//             }
+//         }
+        
+
+//         if(hHit && vHit){
+//             if (hdist < vdist){
+//                 hit = hHit;
+//                 ray->hitPosition[0] = hRayPos[0];
+//                 ray->hitPosition[1] = hRayPos[1];
+//                 ray->distance = hdist;
+
+//                 // draw_floor_tile(hdist,
+//                 //     player.angleInDegrees, 1, i);
+//                 break;
+//             }else {
+//                 hit = vHit;
+//                 ray->hitPosition[0] = vRayPos[0];
+//                 ray->hitPosition[1] = vRayPos[1];
+//                 ray->distance = vdist;
+
+//                 // draw_floor_tile(vdist,
+//                 //     player.angleInDegrees, 1, i);
+//                 break;
+//             }
+//         }
+
+
+
+
+//         if(hHit || vHit){
+//             if(hdist < vdist){
+//                 if (hHit){
+
+//                     hit = hHit;
+//                     ray->hitPosition[0] = hRayPos[0];
+//                     ray->hitPosition[1] = hRayPos[1];
+//                     ray->distance = hdist;
+
+//                     // draw_floor_tile(hdist,
+//                     //     player.angleInDegrees, grid[hMapY][hMapX], i);
+//                     break;
+//                 }else {
+//                     continue;
+//                 }
+//             }else{
+//                 if (vHit){
+
+//                     hit = vHit;
+//                     ray->hitPosition[0] = vRayPos[0];
+//                     ray->hitPosition[1] = vRayPos[1];
+//                     ray->distance = vdist;
+
+//                     // draw_floor_tile(hdist,
+//                     //     player.angleInDegrees, grid[hMapY][hMapX], i);
+//                     break;
+//                 }else {
+//                     continue;
+//                 }
+//             }
+//         }else{
+
+//             if (hdist < vdist){
+//                 ray->hitPosition[0] = hRayPos[0];
+//                 ray->hitPosition[1] = hRayPos[1];
+//                 ray->distance = hdist;
+
+//                 // draw_floor_tile(hdist,
+//                 //     player.angleInDegrees, grid[hMapY][hMapX], i);
+//             }else {
+//                 ray->hitPosition[0] = vRayPos[0];
+//                 ray->hitPosition[1] = vRayPos[1];
+//                 ray->distance = vdist;
+
+//                 // draw_floor_tile(vdist,
+//                 //     player.angleInDegrees, grid[vMapY][vMapX], i);
+//             }
+//         }
+
+//     }
+
+//     sprintf(buffer, "%.1f", ray->distance);
+//     print_text(100, 40, buffer);
+    
+//     ray->hit = hit;
+// }
+
+
+
+
+
 
 // OLD MEANINGLESS COMMENTS
 

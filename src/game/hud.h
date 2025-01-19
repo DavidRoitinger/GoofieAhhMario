@@ -59,9 +59,17 @@ struct Ray {
   Bool8 hit;
 };
 
+struct Pos {
+    f32 dist;
+    Bool8 hit;
+    s32 x;
+    s32 y;
+};
+
 void custom_hud();
 void draw_3d_render();
 void draw_render_demo();
+void draw_floor_tile(f32 distance, f32 angleInDegrees, s32 texture, s32 i);
 
 void draw_entity(struct Entity *entity);
 void draw_background();
@@ -74,7 +82,7 @@ void render_tile_cords(s32 x, s32 y, s32 x2, s32 y2);
 void move_tile(Vec3f *pos, Vec3f targetPos, f32 velocity);
 void handle_stick_movement(struct Entity *entity, f32 velocity);
 
-void castRay(Vec3f start, float angleInDegrees, const s32 grid[10][10], struct Ray *ray);
+void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[10][10], struct Ray *ray, s32 i);
 
 
 #endif // HUD_H

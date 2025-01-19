@@ -165,11 +165,11 @@ ALIGNED8 static const Texture char_debug[] = {
 #include "textures/segment2/edit_debug.rgba16.inc.c"
 };
 
-ALIGNED8 static const Texture char_white[] = {
+ALIGNED8 static const Texture white[] = {
 #include "textures/segment2/edit_white.rgba16.inc.c"
 };
 
-ALIGNED8 static const Texture char_black[] = {
+ALIGNED8 static const Texture black[] = {
 #include "textures/segment2/edit_black.rgba16.inc.c"
 };
 
@@ -184,8 +184,23 @@ ALIGNED8 static const Texture char_ray_indicator[] = {
 #include "textures/segment2/edit_ray_indicator.rgba16.inc.c"
 };
 
+ALIGNED8 static const Texture char_missed_ray_indicator[] = {
+#include "textures/segment2/edit_missed_ray_indicator.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture red[] = {
+#include "textures/segment2/edit_red.rgba16.inc.c"
+};
+ALIGNED8 static const Texture green[] = {
+#include "textures/segment2/edit_green.rgba16.inc.c"
+};
+ALIGNED8 static const Texture grey[] = {
+#include "textures/segment2/edit_grey.rgba16.inc.c"
+};
+
 const Texture *const edit_custom_textures[] = {
-    char_test, char_white, char_black, char_evil_1, char_debug, char_player_indicator, char_ray_indicator,
+    char_debug, char_player_indicator, char_ray_indicator, char_missed_ray_indicator, white, white, white, white, white, white,
+    black, white, red, green, grey
 };
 
 

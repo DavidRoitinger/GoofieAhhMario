@@ -428,10 +428,6 @@ void render_text_labels(void) {
 
     mtx = alloc_display_list(sizeof(*mtx));
 
-    if (mtx == NULL) {
-        sTextLabelsCount = 0;
-        return;
-    }
 
     guOrtho(mtx, 0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, -10.0f, 10.0f, 1.0f);
     gSPPerspNormalize((Gfx *) (gDisplayListHead++), 0xFFFF);
