@@ -197,10 +197,17 @@ ALIGNED8 static const Texture green[] = {
 ALIGNED8 static const Texture grey[] = {
 #include "textures/segment2/edit_grey.rgba16.inc.c"
 };
+ALIGNED8 static const Texture yellow[] = {
+#include "textures/segment2/edit_yellow.rgba16.inc.c"
+};
+ALIGNED8 static const Texture combat_blue[] = {
+#include "textures/segment2/edit_combat_blue.rgba16.inc.c"
+};
 
 const Texture *const edit_custom_textures[] = {
     char_debug, char_player_indicator, char_ray_indicator, char_missed_ray_indicator, white, white, white, white, white, white,
-    black, white, red, green, grey
+    black, white, red, green, grey, yellow, white, white, white, white,
+    combat_blue, white, white, white, white, white, white, white, white, white,
 };
 
 

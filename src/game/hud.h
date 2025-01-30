@@ -67,6 +67,8 @@ struct Pos {
 };
 
 void custom_hud();
+void handle_menu_input();
+void draw_ui(s32 options[], s32 selected, s32 count);
 void draw_3d_render();
 void draw_render_demo();
 void draw_floor_tile(f32 distance, f32 angleInDegrees, s32 texture, s32 i);

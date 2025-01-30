@@ -629,7 +629,7 @@ void render_hud(void) {
 
 s32 grid[10][10] = {
     {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
-    {11, 12, 10, 12, 11, 14, 10, 14, 10, 11},
+    {11, 10, 10, 12, 11, 14, 10, 14, 10, 11},
     {11, 10, 11, 10, 11, 10, 11, 11, 13, 11},
     {11, 12, 10, 12, 13, 10, 10, 10, 10, 11},
     {11, 11, 11, 11, 10, 11, 12, 11, 13, 11},
@@ -645,7 +645,9 @@ const s32 WALL = 11;
 struct Entity enemyList[100];
 
 const s32 HEIGHT = 240; // 224?
+const s32 HEIGHT_CENTER = HEIGHT / 2;
 const s32 WIDTH = 320; // 304?
+const s32 WIDTH_CENTER = WIDTH / 2;
 const s32 TILE_SIZE = 16;
 const f32 TURN_SPEED = 3.0f;
 const f32 MOVE_SPEED = 1.0f;
@@ -656,7 +658,8 @@ const s32 NUM_RAYS = FOV / SLICE_SIZE;
 const s32 COLUMN_WIDTH = WIDTH / (f32) NUM_RAYS;
 
 
-s32 fuck = 1;
+
+
 
 Vec3f enemyPos = {0.0f, 0.0f, 0.0f};
 
@@ -668,39 +671,133 @@ struct Entity player = { .spriteIndex = 1, .pos={24.0f, 24.0f, 0.0f}, .angleInDe
 
 char buffer[100];
 
+s32 selectedMenuOption = 3;
+
+//Timers and delays
+s32 transDelay = -1;
+s32 fuck = 100;
+Bool8 rising = TRUE;
+Bool8 menuPressed = FALSE;
+
+
 void custom_hud(){
 
     //fuck????
     // fuck++;
     // //print_text(200, 100, fuck+"");
     // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-    // add_texture(4);
+    // add_texture(0);
     // gSPScisTextureRectangle(gDisplayListHead++, 0 << 2, 0 << 2, (0 + WIDTH) << 2,
     //                 (0 + HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, fuck << 6, fuck << 3);
     // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
 
-    // create_dl_ortho_matrix();
-    // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-    // gDPSetCombineMode(gDisplayListHead++, G_CC_MODULATERGB, G_CC_MODULATERGB);
-    // gDPSetEnvColor(gDisplayListHead++, 255, 0, 0, 255); // Set color to red
-    // add_texture(4);
-    // render_tile(100, 100);
-    // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
-
-
+    // timer--;
+    // if(timer == 0){
+    //     gMarioState->toMainArea = !gMarioState->toMainArea;
+    //     gMarioState->toCombatArea = !gMarioState->toCombatArea;
+    //     timer = 200;
+    // }
  
 
+    int mapX = (int)(player.pos[0] / 16);
+    int mapY = (int)(player.pos[1] / 16);
+    if(grid[mapY][mapX] == 12){
+        grid[mapY][mapX] = 10;
+        gMarioState->CombatArea = TRUE;
+        transDelay = 25;
+    }
 
-    handle_stick_movement(&player, MOVE_SPEED);
-    //draw_render_demo();
+    if(transDelay > 0){
+        transDelay--;
+    }
+    if(transDelay == 0){
+        gMarioState->MainArea = FALSE;
+        transDelay = -1;
+    }
 
-    draw_3d_render();
 
+    if(gMarioState->MainArea){
+        handle_stick_movement(&player, MOVE_SPEED);
+        draw_3d_render();
+        // draw_render_demo();
+    }
 
+    if(!gMarioState->MainArea && gMarioState->CombatArea){
+            //fuck????
+
+        if(rising){
+            fuck++;
+        }else{
+            fuck--;
+        }
+
+        if(fuck < 100) rising = TRUE;
+        if(fuck > 300) rising = FALSE;
+
+        //print_text(200, 100, fuck+"");
+        gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+        add_texture(20);
+        gSPScisTextureRectangle(gDisplayListHead++, 0 << 2, 0 << 2, (0 + WIDTH) << 2,
+                        (0 + HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, fuck, 5 << 4);
+        gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+        s32 list[] = {2,1,2,3,1,2,1,2,3,1,2,1,2,3,1};
+        s32 count = sizeof(list)/sizeof(list[0]);
+
+        handle_menu_input();
+        
+        draw_ui(list, selectedMenuOption, count);
+    }
 
 }
+
+
+void handle_menu_input(){
+    
+    struct Controller *controller = gMarioState->controller;
+
+
+    if(!menuPressed && controller->buttonDown & L_CBUTTONS){
+        selectedMenuOption -= 1;
+        menuPressed = TRUE;
+    }
+
+    if(!menuPressed && controller->buttonDown & R_CBUTTONS){
+        selectedMenuOption += 1;
+        menuPressed = TRUE;
+    } 
+
+    if (!(controller->buttonDown & R_CBUTTONS) && !(controller->buttonDown & L_CBUTTONS)){
+        menuPressed = FALSE;
+    }
+    
+
+    
+}
+
+
+
+void draw_ui(s32 options[], s32 selected, s32 count){
+    s32 spacing = WIDTH / count;
+
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    add_texture(15);
+    render_tile((spacing >> 1) + (spacing * selected) - 8, 50);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+    for (s32 i = 0; i < count; i++)
+    {
+        gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+        add_texture(options[i]);
+        render_tile((spacing >> 1) + (spacing * i) - 8, 50);
+        gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+    }
+}
+
+
+
 
 void draw_3d_render(){
     for (s32 i = 0; i < FOV / SLICE_SIZE; i++){
@@ -986,6 +1083,9 @@ void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE]
     Bool8 hit = FALSE;
     s32 vdof = 0, hdof = 0;
 
+    draw_floor_tile(1.0f, angleInDegrees, 
+            grid[(int)(start[1] / 16)][(int)(start[0] / 16)], slice_index);
+
     posStackIndex = 0;
 
     for (s32 i = 0; i < 32; i++) {
@@ -1092,7 +1192,7 @@ void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE]
 
     for (s32 i = 0; i <= posStackIndex; i++)
     {
-        draw_floor_tile(posStack[i].dist, player.angleInDegrees, 
+        draw_floor_tile(posStack[i].dist, angleInDegrees, 
             grid[posStack[i].y][posStack[i].x], slice_index);
         if(posStack[i].hit){
             break;

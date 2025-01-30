@@ -1937,6 +1937,11 @@ void init_mario(void) {
         capObject->oForwardVel = 0;
         capObject->oMoveAngleYaw = 0;
     }
+    // ----- EDIT
+
+    // gMarioState->MainArea = TRUE;
+    // gMarioState->CombatArea = FALSE;
+
 }
 
 void init_mario_from_save_file(void) {
@@ -1967,4 +1972,9 @@ void init_mario_from_save_file(void) {
 
     gHudDisplay.coins = 0;
     gHudDisplay.wedges = 8;
+
+    // ----- EDIT
+
+    gMarioState->MainArea = TRUE;
+    gMarioState->CombatArea = FALSE;
 }

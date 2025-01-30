@@ -547,4 +547,6 @@ extern const BehaviorScript bhvNUp[];
 
 extern const BehaviorScript bhvSpinningPlatform[];
 
+extern const BehaviorScript bhvWarpCustom[];
+
 #endif // BEHAVIOR_DATA_H

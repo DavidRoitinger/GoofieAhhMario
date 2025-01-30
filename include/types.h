@@ -464,6 +464,9 @@ struct MarioState {
     // ----- EDIT
             u32 parryTimer;
 
+            Bool8 MainArea;
+            Bool8 CombatArea;
+
 };
 
 #endif // TYPES_H
