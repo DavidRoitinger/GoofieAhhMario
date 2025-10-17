@@ -381,6 +381,20 @@ struct MarioBodyState {
     // u8 filler[4];
 };
 
+enum GameType {
+    OVERWORLD = 0,
+    COMBAT = 1,
+};
+
+enum CombatState {
+    START = 0,
+    PLAYER_TURN = 1,
+    PLAYER_ATTACK = 3,
+    ENEMY_ATTACK = 4,
+    WIN = 5,
+    LOSE = 6,
+};
+
 struct MarioState {
     /*0x00*/ u16 playerID;
     /*0x02*/ u16 input;
@@ -464,8 +478,10 @@ struct MarioState {
     // ----- EDIT
             u32 parryTimer;
 
-            Bool8 MainArea;
-            Bool8 CombatArea;
+            u8 gameType;
+            u8 combatState;
+
+            s32 transDelay;
 
 };
 

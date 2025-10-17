@@ -1,4 +1,5 @@
 #include <PR/ultratypes.h>
+#include <string.h>
 
 #include "sm64.h"
 #include "actors/common1.h"
@@ -627,22 +628,55 @@ void render_hud(void) {
 
 // ----- EDIT
 
-s32 grid[10][10] = {
-    {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
-    {11, 10, 10, 12, 11, 14, 10, 14, 10, 11},
-    {11, 10, 11, 10, 11, 10, 11, 11, 13, 11},
-    {11, 12, 10, 12, 13, 10, 10, 10, 10, 11},
-    {11, 11, 11, 11, 10, 11, 12, 11, 13, 11},
-    {11, 10, 14, 11, 12, 11, 10, 13, 10, 11},
-    {11, 14, 10, 12, 10, 11, 12, 11, 11, 11},
-    {11, 10, 11, 11, 11, 11, 10, 10, 14, 11},
-    {11, 13, 10, 12, 10, 12, 10, 13, 10, 11},
-    {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
-    };
+s32 grid[10][10][10] = {
+    {
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+        {11, 10, 10, 10, 11, 14, 10, 14, 10, 11},
+        {11, 10, 11, 10, 11, 10, 11, 11, 13, 11},
+        {11, 12, 10, 10, 13, 10, 10, 10, 10, 11},
+        {11, 11, 11, 11, 10, 11, 14, 11, 13, 11},
+        {11, 10, 14, 11, 12, 11, 10, 13, 10, 11},
+        {11, 14, 10, 12, 10, 11, 14, 11, 11, 11},
+        {11, 10, 11, 11, 11, 11, 10, 10, 14, 11},
+        {11, 13, 10, 14, 10, 13, 10, 13, 10, 11},
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+    },
+    {
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+        {11, 10, 10, 10, 10, 14, 10, 14, 10, 11},
+        {11, 10, 11, 10, 11, 10, 11, 11, 13, 11},
+        {11, 12, 10, 10, 13, 10, 10, 10, 10, 11},
+        {11, 11, 11, 10, 10, 11, 14, 11, 13, 11},
+        {11, 10, 14, 11, 12, 10, 10, 13, 10, 11},
+        {11, 14, 10, 12, 10, 10, 14, 11, 11, 11},
+        {11, 10, 11, 10, 11, 11, 10, 10, 14, 11},
+        {11, 13, 10, 14, 10, 13, 10, 13, 10, 11},
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+    },
+    {
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+        {11, 10, 10, 10, 10, 14, 10, 14, 10, 11},
+        {11, 10, 14, 10, 14, 10, 14, 14, 13, 11},
+        {11, 12, 10, 10, 13, 10, 10, 10, 10, 11},
+        {11, 14, 14, 10, 10, 14, 14, 14, 13, 11},
+        {11, 10, 14, 14, 12, 10, 10, 13, 10, 11},
+        {11, 14, 10, 12, 10, 10, 14, 14, 14, 11},
+        {11, 10, 14, 10, 14, 14, 10, 10, 14, 11},
+        {11, 13, 10, 14, 10, 13, 10, 13, 10, 11},
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+    }
+
+};
+
+s32 layer = 1;
 
 const s32 MAP_SIZE = 10;
 const s32 WALL = 11;
-struct Entity enemyList[100];
+
+s32 sprite_count = 0;
+s32 hit_count = 0;
+s32 ray_count = 0;
+
 
 const s32 HEIGHT = 240; // 224?
 const s32 HEIGHT_CENTER = HEIGHT / 2;
@@ -653,15 +687,17 @@ const f32 TURN_SPEED = 3.0f;
 const f32 MOVE_SPEED = 1.0f;
 const f32 PI = 3.141592653589793f;
 const s32 FOV = 80;
-const f32 SLICE_SIZE = 0.5f;
+const f32 SLICE_SIZE = 1.0f;
 const s32 NUM_RAYS = FOV / SLICE_SIZE;
 const s32 COLUMN_WIDTH = WIDTH / (f32) NUM_RAYS;
 
 
+const s32 posStackSize = 32;
+struct Pos posStack[32];
+s32 posStackIndex = 0;
 
+const s32 MAX_RAYCAST_DEPTH = 32;
 
-
-Vec3f enemyPos = {0.0f, 0.0f, 0.0f};
 
 f32 angleInDegrees = 0.0f;
 
@@ -671,128 +707,420 @@ struct Entity player = { .spriteIndex = 1, .pos={24.0f, 24.0f, 0.0f}, .angleInDe
 
 char buffer[100];
 
-s32 selectedMenuOption = 3;
 
-//Timers and delays
-s32 transDelay = -1;
-s32 fuck = 100;
-Bool8 rising = TRUE;
-Bool8 menuPressed = FALSE;
+
+struct Enemy enemyList[100] = {
+    { .name = "BOB", .spriteIndex = 0, .health = 10, .damage = 1},
+    { .name = "BOB1", .spriteIndex = 1, .health = 11, .damage = 1},
+    { .name = "BOB2", .spriteIndex = 2, .health = 12, .damage = 1},
+    { .name = "BOB3", .spriteIndex = 3, .health = 13, .damage = 1},
+    { .name = "BOBUS", .spriteIndex = 4, .health = 3, .damage = 2}
+};
+s32 enemyListCount = 5;
+
+
+
+
+//Used for Transitions
+u8 targetGameType = OVERWORLD;
+
+
+
+
+struct Dialog dialog = { .textBuffer = {"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee","BADAD ASDA ASADA FASDFA  ASDFASD ASDASDA AAASDADADADAS",
+"Test qwertzuiooopasdfghjklyxcvbnm", "fghjklyxcvbnm"}, .charIndex = 0, .lineIndex = 0, .lineCount = 4};
+
+struct Choice choice = { .selectedOption = 0, .optionCount = 0, .answer = 0, .textBuffer = {}};
+
+
+struct Enemy enemy = { .name = "Placeholder", .spriteIndex = 0, .health = 1, .damage = 1};
+
+struct PlayerStats playerStats = { .health = 10, .damage = 2, .fokus = 1};
 
 
 void custom_hud(){
-
-    //fuck????
-    // fuck++;
-    // //print_text(200, 100, fuck+"");
-    // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-    // add_texture(0);
-    // gSPScisTextureRectangle(gDisplayListHead++, 0 << 2, 0 << 2, (0 + WIDTH) << 2,
-    //                 (0 + HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, fuck << 6, fuck << 3);
-    // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
-
-
-
-    // timer--;
-    // if(timer == 0){
-    //     gMarioState->toMainArea = !gMarioState->toMainArea;
-    //     gMarioState->toCombatArea = !gMarioState->toCombatArea;
-    //     timer = 200;
+    // for (s8 i = 0; i < 25; i++)
+    // {
+    //     gSPDisplayList(gDisplayListHead++, dl_hud_img_begin_tinted);
+    //     add_texture(11);
+    //     gDPSetCombineMode(gDisplayListHead++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+    //     gDPSetPrimColor(gDisplayListHead++, 0, 0, 255-i*10, 255-i*10, 255-i*10, 255);
+    //     render_tile(10+i*16, 100);
+    //     gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
     // }
- 
 
+    sprite_count = 0;
+    hit_count = 0;
+    ray_count = 0;
+
+    handel_transition();
+
+    
+    allocate_area();
+    
+    handel_dialog(&dialog);
+    handel_choice(&choice);
+
+    sprintf(buffer, "S: %d", sprite_count);
+    print_text(230, 220, buffer);
+
+    sprintf(buffer, "H: %d", hit_count);
+    print_text(230, 200, buffer);
+
+    sprintf(buffer, "M: %d", NUM_RAYS - hit_count);
+    print_text(230, 180, buffer);
+ 
+    sprintf(buffer, "NR: %d", NUM_RAYS);
+    print_text(230, 160, buffer);
+ 
+    sprintf(buffer, "RC: %d", ray_count);
+    print_text(230, 140, buffer);
+    
+}
+
+void allocate_area(){
+
+    switch (gMarioState->gameType)
+    {
+    case OVERWORLD:
+        handle_stick_movement(&player, MOVE_SPEED);
+        // draw_3d_render();
+        draw_render_demo();
+        break;
+
+    case COMBAT:
+        combat_area();
+        break;
+
+    default:
+        break;
+    }
+}
+
+
+void handel_transition(){
+
+    //begin transition
     int mapX = (int)(player.pos[0] / 16);
     int mapY = (int)(player.pos[1] / 16);
-    if(grid[mapY][mapX] == 12){
-        grid[mapY][mapX] = 10;
-        gMarioState->CombatArea = TRUE;
-        transDelay = 25;
+    if(grid[layer][mapY][mapX] == 12){
+        grid[layer][mapY][mapX] = 10;
+        targetGameType = COMBAT;
+        gMarioState->transDelay = 25;
     }
 
-    if(transDelay > 0){
-        transDelay--;
+    //wait for the transition animation to end 
+    if(gMarioState->transDelay > 0){
+        gMarioState->transDelay--;
     }
-    if(transDelay == 0){
-        gMarioState->MainArea = FALSE;
-        transDelay = -1;
-    }
-
-
-    if(gMarioState->MainArea){
-        handle_stick_movement(&player, MOVE_SPEED);
-        draw_3d_render();
-        // draw_render_demo();
+    if(gMarioState->transDelay == 0){
+        gMarioState->gameType = targetGameType;
+        gMarioState->transDelay = -1;
     }
 
-    if(!gMarioState->MainArea && gMarioState->CombatArea){
-            //fuck????
-
-        if(rising){
-            fuck++;
-        }else{
-            fuck--;
-        }
-
-        if(fuck < 100) rising = TRUE;
-        if(fuck > 300) rising = FALSE;
-
-        //print_text(200, 100, fuck+"");
-        gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-        add_texture(20);
-        gSPScisTextureRectangle(gDisplayListHead++, 0 << 2, 0 << 2, (0 + WIDTH) << 2,
-                        (0 + HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, fuck, 5 << 4);
-        gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
-
-        s32 list[] = {2,1,2,3,1,2,1,2,3,1,2,1,2,3,1};
-        s32 count = sizeof(list)/sizeof(list[0]);
-
-        handle_menu_input();
-        
-        draw_ui(list, selectedMenuOption, count);
-    }
 
 }
 
 
-void handle_menu_input(){
+void combat_area(){
+
+    switch (gMarioState->combatState)
+    {
+    case START:
+        if(dialog.lineCount > 0) break;
+        if(choice.optionCount > 0) break;
+
+        start_dialog((char*[]){"Hello?", "Hello, is this working?", "Great!"}, 3);
+
+        enemy = enemyList[RAND(5)];
+
+        gMarioState->combatState = PLAYER_TURN;
+
+        break;
+    
+    case PLAYER_TURN:
+
+        if(dialog.lineCount > 0) break;
+        if(choice.optionCount > 0) break;
+
+        start_choice((char*[]){"Attack", "Fokus"}, 2);
+
+        gMarioState->combatState = PLAYER_ATTACK;
+
+        break;
+        
+        case PLAYER_ATTACK:
+        
+        if(dialog.lineCount > 0) break;
+        if(choice.optionCount > 0) break;
+
+        if(choice.answer == 0){
+            enemy.health -= (s32) floor(playerStats.damage * playerStats.fokus);
+            playerStats.fokus = 1;
+        }    
+
+        if(choice.answer == 1){
+            playerStats.fokus = playerStats.fokus * 1.75f;
+        }    
+        
+        
+        sprintf(buffer, "Player uses option: %d", choice.answer);
+        
+        start_dialog((char*[]){buffer, "It works!"}, 2);  
+        
+        gMarioState->combatState = ENEMY_ATTACK;
+
+        break;
+
+    case ENEMY_ATTACK:
+
+        if(dialog.lineCount > 0) break;
+        if(choice.optionCount > 0) break;
+
+        playerStats.health -= enemy.damage;
+
+        start_dialog((char*[]){"The Enemy does things!", "Wow!"}, 2);
+
+        gMarioState->combatState = PLAYER_TURN;
+
+        break;
+    
+    case WIN:
+        if(dialog.lineCount > 0) break;
+        if(choice.optionCount > 0) break;
+
+        start_dialog((char*[]){"The Enemy is dead!", "You get nothing!"}, 2);
+
+        //Temp solution...
+        gMarioState->combatState = START;
+        targetGameType = OVERWORLD;
+        gMarioState->transDelay = 25;
+        break;
+
+    case LOSE:
+        break;
+
+    default:
+        break;
+    }
+
+    if(gMarioState->combatState != WIN && gMarioState->combatState != START && enemy.health <= 0){
+        
+        gMarioState->combatState = WIN;
+    }
+
+
+
+
+
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    add_texture(20);
+    gSPScisTextureRectangle(gDisplayListHead++, 0 << 2, 0 << 2, (0 + WIDTH) << 2,
+    (0 + HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, 100, 5 << 4);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+    
+
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin_tinted);
+
+    add_texture(enemy.spriteIndex);
+
+    gDPSetCombineMode(gDisplayListHead++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+    if(enemy.health <= 0){
+        gDPSetPrimColor(gDisplayListHead++, 0, 0, 255, 50, 50, 255);
+    }else{
+        gDPSetPrimColor(gDisplayListHead++, 0, 0, 255, 255, 255, 255);
+    }
+    
+    
+    render_tile(WIDTH/2-8, HEIGHT/3);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+    print_text_centered(WIDTH/2, HEIGHT-50, enemy.name);
+
+    sprintf(buffer, "%d", enemy.health);
+    print_text_centered(WIDTH/2, HEIGHT-110, buffer);
+    
+    sprintf(buffer, "%d", playerStats.health);
+    print_text(10, HEIGHT-150, buffer);
+
+
+    draw_player_stat_box();
+
+
+}
+
+void start_choice(char *textBuffer[], s32 optionCount){
+    if(dialog.lineCount > 0) return;
+    if(choice.optionCount > 0) return;
+    
+    for (s32 i = 0; i < optionCount; i++)
+    {
+        strcpy(choice.textBuffer[i], textBuffer[i]);
+    }
+    
+    choice.optionCount = optionCount;    
+}
+
+void start_dialog(char *textBuffer[], s32 lineCount){
+    if(dialog.lineCount > 0) return;
+    if(choice.optionCount > 0) return;
+    
+    for (s32 i = 0; i < lineCount; i++)
+    {
+        strcpy(dialog.textBuffer[i], textBuffer[i]);
+    }
+    
+    dialog.lineCount = lineCount;    
+}
+
+void add_dialog(char *textBuffer[], s32 lineCount){
+    for (s32 i = dialog.lineCount - 1; i < lineCount + dialog.lineCount; i++)
+    {
+        strcpy(dialog.textBuffer[i], textBuffer[i]);
+    }
+    
+    dialog.lineCount += lineCount;    
+}
+
+
+void handel_choice(struct Choice *choice){
+    if (choice->optionCount <= 0) return;
+    
+    draw_dialog_box();
+    
+    draw_ui_text_options( 20, 50, choice->textBuffer, choice->selectedOption, choice->optionCount);
+    
+    handle_choice_input(choice);
+
+}
+
+
+
+
+void handel_dialog(struct Dialog *dialog){
+    if(dialog->lineCount <= 0) return;
+
+    draw_dialog_box();
+
+    char lines[3][72] = {};
+    
+    for (s32 i = 0; i < dialog->charIndex; i++)
+    {
+        if(dialog->textBuffer[dialog->lineIndex][i] == '\0') break;
+
+        if(i < 24){
+            lines[0][i] = dialog->textBuffer[dialog->lineIndex][i];
+        } else if (i < 48){
+            lines[1][i - 24] = dialog->textBuffer[dialog->lineIndex][i];
+        }else{
+            lines[2][i - 48] = dialog->textBuffer[dialog->lineIndex][i];
+        }
+        
+        
+    }
+
+    print_text(16, 50, lines[0]);
+    print_text(16, 30, lines[1]);
+    print_text(16, 10, lines[2]);
+
+    if(dialog->charIndex < 71) dialog->charIndex++;
+
+    handle_dialog_input(dialog);
+}
+
+void handle_dialog_input(struct Dialog *dialog){
+        if(gMarioState->controller->buttonPressed & A_BUTTON){
+        dialog->charIndex = 0,
+        dialog->lineIndex++;
+
+        //End of Dialog?
+        if(dialog->lineIndex == dialog->lineCount){
+            dialog->lineIndex = 0;
+            dialog->lineCount = 0;
+        }
+    }
+}
+
+void draw_dialog_box(){
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    add_texture(11);
+    render_tile_cords(4, HEIGHT-80, WIDTH, HEIGHT);
+    add_texture(10);
+    render_tile_cords(9, HEIGHT-75, WIDTH-5, HEIGHT-5);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+}
+
+void draw_player_stat_box(){
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    add_texture(11);
+    render_tile_cords(4, HEIGHT-115, WIDTH/3, HEIGHT-75);
+    add_texture(10);
+    render_tile_cords(9, HEIGHT-110, WIDTH/3-5, HEIGHT-80);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+}
+
+void handle_choice_input(struct Choice *choice){
+
+    if(dialog.lineCount > 0) return;
     
     struct Controller *controller = gMarioState->controller;
 
-
-    if(!menuPressed && controller->buttonDown & L_CBUTTONS){
-        selectedMenuOption -= 1;
-        menuPressed = TRUE;
+    
+    if(gMarioState->controller->buttonPressed & A_BUTTON){
+        choice->answer = choice->selectedOption;
+        choice->selectedOption = 0;
+        choice->optionCount = 0;
+        
     }
 
-    if(!menuPressed && controller->buttonDown & R_CBUTTONS){
-        selectedMenuOption += 1;
-        menuPressed = TRUE;
+    if(choice->selectedOption > 0 &&
+        controller->buttonPressed & U_CBUTTONS){
+
+        choice->selectedOption -= 1;
+    }
+
+    if(choice->selectedOption < (choice->optionCount - 1) &&
+        controller->buttonPressed & D_CBUTTONS){
+
+        choice->selectedOption += 1;
     } 
 
-    if (!(controller->buttonDown & R_CBUTTONS) && !(controller->buttonDown & L_CBUTTONS)){
-        menuPressed = FALSE;
-    }
-    
 
-    
 }
 
 
 
-void draw_ui(s32 options[], s32 selected, s32 count){
+void draw_ui_icon_options(s32 x, s32 options[], s32 selected, s32 count){
     s32 spacing = WIDTH / count;
 
     gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
     add_texture(15);
-    render_tile((spacing >> 1) + (spacing * selected) - 8, 50);
+    render_tile((spacing >> 1) + (spacing * selected) - 8, x);
     gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
     for (s32 i = 0; i < count; i++)
     {
         gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
         add_texture(options[i]);
-        render_tile((spacing >> 1) + (spacing * i) - 8, 50);
+        render_tile((spacing >> 1) + (spacing * i) - 8, x);
         gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+    }
+}
+
+void draw_ui_text_options(s32 x, s32 y, char options[][24], s32 selected, s32 count){
+
+    draw_dialog_box();
+
+    s32 spacing = 40;
+
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    add_texture(15);
+    render_tile(x,  HEIGHT - y + (spacing * selected) - 16);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+    for (s32 i = 0; i < count; i++)
+    {
+        print_text(x + 20, y - (spacing * i), options[i]);
     }
 }
 
@@ -802,7 +1130,7 @@ void draw_ui(s32 options[], s32 selected, s32 count){
 void draw_3d_render(){
     for (s32 i = 0; i < FOV / SLICE_SIZE; i++){
         s32 angle = player.angleInDegrees + FOV/-2 + (i * SLICE_SIZE);
-	    castRay(player.pos, angle, grid, &ray, i);
+	    castRay(player.pos, angle, grid[layer], &ray, i);
         
         // if(ray.hit){
         //     ray.distance *= coss(degrees_to_angle(player.angleInDegrees - angle));
@@ -826,9 +1154,9 @@ void draw_3d_render(){
 void draw_render_demo(){
     gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
     Vec3f tilePos;
-    for (int i = 0; i < (int)(sizeof(grid) / sizeof(grid[0])); i++) {
-        for (int j = 0; j < (int)(sizeof(grid[0]) / sizeof(grid[0][0])); j++) {
-            add_texture(grid[i][j]);
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            add_texture(grid[layer][i][j]);
             vec3f_set(tilePos, 8 + (j * TILE_SIZE), 0, 8 + i * TILE_SIZE);
             render_tile(tilePos[0], tilePos[2]);
         }
@@ -836,7 +1164,7 @@ void draw_render_demo(){
     gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
     for (int i = FOV/-2; i < FOV; i+= SLICE_SIZE){
-	    castRay(player.pos, player.angleInDegrees + i, grid, &ray, i);
+	    castRay(player.pos, player.angleInDegrees + i, grid[layer], &ray, i);
 
         gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
         if(ray.hit){
@@ -914,6 +1242,21 @@ void add_texture(s8 glyphIndex){
     gSPDisplayList(gDisplayListHead++, dl_hud_img_load_tex_block);
 }
 
+void add_texture_tinted(s8 glyphIndex){
+    const Texture *const *glyphs = segmented_to_virtual(edit_custom_textures);
+
+    gDPPipeSync(gDisplayListHead++);
+    gDPLoadTextureBlock(
+        gDisplayListHead++,
+        glyphs[glyphIndex],
+        G_IM_FMT_RGBA, G_IM_SIZ_16b,
+        16, 16,
+        0, G_TX_CLAMP, G_TX_CLAMP,
+        G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD
+    );
+}
+
 
 void render_tile(s32 x, s32 y) {
     s32 rectBaseX = x;
@@ -923,10 +1266,8 @@ void render_tile(s32 x, s32 y) {
 
     rectX = rectBaseX;
     rectY = rectBaseY;
-    gSPScisTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + 15) << 2,
-                        (rectY + 15) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
-    // gSPTextureRectangle(gDisplayListHead++, 0 << 2, 0 << 2, (WIDTH + 12) << 2,
-    //                     (HEIGHT + 13) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
+    gSPScisTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + 16) << 2,
+                        (rectY + 16) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
 }
 
 void render_tile_sized(s32 x, s32 y, s32 xSize, s32 ySize) {
@@ -934,15 +1275,12 @@ void render_tile_sized(s32 x, s32 y, s32 xSize, s32 ySize) {
     s32 rectBaseY = y;
     s32 rectX;
     s32 rectY;
-    xSize--;
-    ySize--;
 
     rectX = rectBaseX;
     rectY = rectBaseY;
     gSPScisTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + xSize) << 2,
-                        (rectY + ySize) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
-    // gSPScisTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + xSize) << 2,
-    //                     (rectY + ySize) << 2, G_TX_RENDERTILE, 0, 0, fuck << 3, fuck << 1);
+                        (rectY + ySize) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+
 }
 
 void render_tile_cords(s32 x, s32 y, s32 x2, s32 y2) {
@@ -950,7 +1288,7 @@ void render_tile_cords(s32 x, s32 y, s32 x2, s32 y2) {
     y2--;
 
     gSPScisTextureRectangle(gDisplayListHead++, x << 2, y << 2, (x2) << 2,
-                        (y2) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
+                        (y2) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 4 << 10);
 }
 
 
@@ -976,6 +1314,10 @@ void move_tile(Vec3f *pos, Vec3f targetPos, f32 velocity) {
 
 
 void handle_stick_movement(struct Entity *entity, f32 velocity){
+
+    //Lock movement while in dialog
+    if(dialog.lineCount > 0) return;
+
     Vec3f stickVec = {0.0f, 0.0f, 0.0f};
     Vec3f rotVec = {0.0f, 0.0f, 0.0f};
     
@@ -1023,8 +1365,8 @@ void handle_stick_movement(struct Entity *entity, f32 velocity){
     s32 gridX = (s32)(newX / TILE_SIZE); 
     s32 gridY = (s32)(newY / TILE_SIZE);
 
-    rotVec[0] = grid[gridY][gridX] == WALL ? 0 : rotVec[0];
-    rotVec[1] = grid[gridY][gridX] == WALL ? 0 : rotVec[1];
+    rotVec[0] = grid[layer][gridY][gridX] == WALL ? 0 : rotVec[0];
+    rotVec[1] = grid[layer][gridY][gridX] == WALL ? 0 : rotVec[1];
 
     vec3f_sum(entity->pos, entity->pos, rotVec);
     
@@ -1044,10 +1386,27 @@ void draw_floor_tile(f32 distance, f32 angleInDegrees, s32 texture, s32 i){
 
     f32 wallOffset = HEIGHT / 2.0f - wallHeight / 2.0f;
 
-    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
-    add_texture(texture);
-    render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
-    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+    // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    // add_texture(texture);
+    // render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
+    // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+
+
+    // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin_tinted);
+    // add_texture(texture);
+    // gDPSetCombineMode(gDisplayListHead++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+
+
+    // s32 brightness = 255 - (s32)floor((distance * 1.5) - 1);
+    
+    
+    // gDPSetPrimColor(gDisplayListHead++, 0, 0, brightness, brightness, brightness, 255);
+
+    // render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
+    // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+
+    sprite_count++;
     
 }
 
@@ -1070,13 +1429,11 @@ f32 floor(f32 f){
     return (f32)(s32)f;
 }
 
-const s32 posStackSize = 32;
-struct Pos posStack[32];
-s32 posStackIndex = 0;
 
-const s32 MAX_RAYCAST_DEPTH = 16;
+
 
 void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE], struct Ray *ray, s32 slice_index){
+    ray_count++;
     s16 angle = degrees_to_angle(angleInDegrees);
     float vtan = -tans(angle), htan = -1.0f / tans(angle);
     float cellSize = 16;
@@ -1195,6 +1552,7 @@ void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE]
         draw_floor_tile(posStack[i].dist, angleInDegrees, 
             grid[posStack[i].y][posStack[i].x], slice_index);
         if(posStack[i].hit){
+            hit_count++;
             break;
         }
     }

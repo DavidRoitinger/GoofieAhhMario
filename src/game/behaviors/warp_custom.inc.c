@@ -2,8 +2,9 @@ void bhv_warp_custom_loop(void) {
     o->oPosY = 100.0f;
     o->hitboxRadius = 10.0f;
 
-    if(((o->oBehParams >> 24) == 1 && gMarioState->MainArea)||
-        ((o->oBehParams >> 24) == 0 && gMarioState->CombatArea)){
+    if(gMarioState->transDelay >= 0){
+    // if(((o->oBehParams >> 24) == COMBAT && gMarioState->gameType == OVERWORLD)||
+    //     ((o->oBehParams >> 24) == OVERWORLD && gMarioState->gameType == COMBAT)){
         o->oPosY = 0.0f;
         o->hitboxRadius = 1000.0f;
     }else{

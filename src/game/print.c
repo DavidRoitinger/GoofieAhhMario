@@ -363,7 +363,8 @@ s32 char_to_glyph_index(char c) {
  * Adds an individual glyph to be rendered.
  */
 void add_glyph_texture(s8 glyphIndex) {
-    const Texture *const *glyphs = segmented_to_virtual(main_hud_lut);
+    // ----- EDIT
+    const Texture *const *glyphs = segmented_to_virtual(goof_font);
 
     gDPPipeSync(gDisplayListHead++);
     gDPSetTextureImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, glyphs[glyphIndex]);

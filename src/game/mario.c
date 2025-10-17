@@ -1937,10 +1937,6 @@ void init_mario(void) {
         capObject->oForwardVel = 0;
         capObject->oMoveAngleYaw = 0;
     }
-    // ----- EDIT
-
-    // gMarioState->MainArea = TRUE;
-    // gMarioState->CombatArea = FALSE;
 
 }
 
@@ -1975,6 +1971,6 @@ void init_mario_from_save_file(void) {
 
     // ----- EDIT
 
-    gMarioState->MainArea = TRUE;
-    gMarioState->CombatArea = FALSE;
+    gMarioState->gameType = OVERWORLD;
+    gMarioState->transDelay = -1;
 }
