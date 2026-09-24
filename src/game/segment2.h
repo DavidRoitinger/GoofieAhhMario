@@ -11,6 +11,7 @@ extern const struct PPTextFont *const gPuppyPrintFontTable[];
 // ----- EDIT
 
 extern Texture *edit_custom_textures[50];
+extern Texture *goof_font[100];
 
 
 extern u8 seg2_course_name_table[];
@@ -53,6 +54,8 @@ extern s16 seg2_painting_mesh_neighbor_tris[];
 extern Texture *main_hud_lut[58];
 extern Gfx dl_hud_img_load_tex_block[];
 extern Gfx dl_hud_img_begin[];
+// ----- EDIT
+extern Gfx dl_hud_img_begin_tinted[];
 extern Gfx dl_hud_img_end[];
 extern void *main_font_lut[];
 extern Gfx dl_ia_text_tex_settings[];

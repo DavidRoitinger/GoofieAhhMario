@@ -165,11 +165,11 @@ ALIGNED8 static const Texture char_debug[] = {
 #include "textures/segment2/edit_debug.rgba16.inc.c"
 };
 
-ALIGNED8 static const Texture char_white[] = {
+ALIGNED8 static const Texture white[] = {
 #include "textures/segment2/edit_white.rgba16.inc.c"
 };
 
-ALIGNED8 static const Texture char_black[] = {
+ALIGNED8 static const Texture black[] = {
 #include "textures/segment2/edit_black.rgba16.inc.c"
 };
 
@@ -184,11 +184,177 @@ ALIGNED8 static const Texture char_ray_indicator[] = {
 #include "textures/segment2/edit_ray_indicator.rgba16.inc.c"
 };
 
+ALIGNED8 static const Texture char_missed_ray_indicator[] = {
+#include "textures/segment2/edit_missed_ray_indicator.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture red[] = {
+#include "textures/segment2/edit_red.rgba16.inc.c"
+};
+ALIGNED8 static const Texture green[] = {
+#include "textures/segment2/edit_green.rgba16.inc.c"
+};
+ALIGNED8 static const Texture grey[] = {
+#include "textures/segment2/edit_grey.rgba16.inc.c"
+};
+ALIGNED8 static const Texture yellow[] = {
+#include "textures/segment2/edit_yellow.rgba16.inc.c"
+};
+ALIGNED8 static const Texture combat_blue[] = {
+#include "textures/segment2/edit_combat_blue.rgba16.inc.c"
+};
+
 const Texture *const edit_custom_textures[] = {
-    char_test, char_white, char_black, char_evil_1, char_debug, char_player_indicator, char_ray_indicator,
+    char_debug, char_player_indicator, char_ray_indicator, char_missed_ray_indicator, char_test, white, white, white, white, white,
+    black, white, red, green, grey, yellow, white, white, white, white,
+    combat_blue, white, white, white, white, white, white, white, white, white,
 };
 
 
+ALIGNED8 static const Texture goof_0[] = {
+#include "textures/segment2/goof_0.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_1[] = {
+#include "textures/segment2/goof_1.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_2[] = {
+#include "textures/segment2/goof_2.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_3[] = {
+#include "textures/segment2/goof_3.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_4[] = {
+#include "textures/segment2/goof_4.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_5[] = {
+#include "textures/segment2/goof_5.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_6[] = {
+#include "textures/segment2/goof_6.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_7[] = {
+#include "textures/segment2/goof_7.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_8[] = {
+#include "textures/segment2/goof_8.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_9[] = {
+#include "textures/segment2/goof_9.rgba16.inc.c"
+};
+
+
+ALIGNED8 static const Texture goof_A[] = {
+#include "textures/segment2/goof_A.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_B[] = {
+#include "textures/segment2/goof_B.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_C[] = {
+#include "textures/segment2/goof_C.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_D[] = {
+#include "textures/segment2/goof_D.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_E[] = {
+#include "textures/segment2/goof_E.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_F[] = {
+#include "textures/segment2/goof_F.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_G[] = {
+#include "textures/segment2/goof_G.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_H[] = {
+#include "textures/segment2/goof_H.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_I[] = {
+#include "textures/segment2/goof_I.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_J[] = {
+#include "textures/segment2/goof_J.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_K[] = {
+#include "textures/segment2/goof_K.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_L[] = {
+#include "textures/segment2/goof_L.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_M[] = {
+#include "textures/segment2/goof_M.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_N[] = {
+#include "textures/segment2/goof_N.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_O[] = {
+#include "textures/segment2/goof_O.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_P[] = {
+#include "textures/segment2/goof_P.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_Q[] = {
+#include "textures/segment2/goof_Q.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_R[] = {
+#include "textures/segment2/goof_R.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_S[] = {
+#include "textures/segment2/goof_S.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_T[] = {
+#include "textures/segment2/goof_T.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_U[] = {
+#include "textures/segment2/goof_U.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_V[] = {
+#include "textures/segment2/goof_V.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_W[] = {
+#include "textures/segment2/goof_W.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_X[] = {
+#include "textures/segment2/goof_X.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_Y[] = {
+#include "textures/segment2/goof_Y.rgba16.inc.c"
+};
+
+ALIGNED8 static const Texture goof_Z[] = {
+#include "textures/segment2/goof_Z.rgba16.inc.c"
+};
 
 
 
@@ -2049,6 +2215,28 @@ ALIGNED8 static const Texture texture_hud_char_arrow_down[] = {
 #include "textures/segment2/segment2.081D0.rgba16.inc.c"
 };
 
+
+// ----- EDIT
+const Texture *const goof_font[] = {
+    goof_0, goof_1, goof_2, goof_3,
+    goof_4, goof_5, goof_6, goof_7,
+    goof_8, goof_9, goof_A, goof_B,
+    goof_C, goof_D, goof_E, goof_F,
+    goof_G, goof_H, goof_I, goof_J,
+    goof_K, goof_L, goof_M, goof_N,
+    goof_O, goof_P, goof_Q, goof_R,
+    goof_S, goof_T, goof_U, goof_V,
+    goof_W, goof_X, goof_Y, goof_Z,
+    texture_hud_char_exclamation, texture_hud_char_double_exclamation, texture_hud_char_question, texture_hud_char_ampersand,
+    texture_hud_char_percent,                0x0,                0x0,                0x0,
+                   0x0,                0x0,                0x0, texture_hud_char_minus,
+    texture_hud_char_multiply, texture_hud_char_coin, texture_hud_char_red_coin, texture_hud_char_silver_coin,
+    texture_hud_char_mario_head, texture_hud_char_star, texture_hud_char_decimal_point, texture_hud_char_beta_key,
+    texture_hud_char_apostrophe, texture_hud_char_double_quote, texture_hud_char_umlaut,
+};
+
+
+
 // Main HUD print table 0x02008250-0x02008337
 const Texture *const main_hud_lut[] = {
     texture_hud_char_0, texture_hud_char_1, texture_hud_char_2, texture_hud_char_3,
@@ -2307,6 +2495,19 @@ const Gfx dl_hud_img_begin[] = {
     gsDPSetAlphaCompare(G_AC_THRESHOLD),
     gsDPSetBlendColor(255, 255, 255, 255),
     gsDPSetRenderMode(G_RM_NOOP, G_RM_NOOP2),
+    gsDPSetTextureFilter(G_TF_POINT),
+    gsSPEndDisplayList(),
+};
+
+// ----- EDIT
+
+// Custom "begin" for tinted HUD sprites
+const Gfx dl_hud_img_begin_tinted[] = {
+    gsDPPipeSync(),
+    gsDPSetCycleType(G_CYC_1CYCLE),
+    gsDPSetTexturePersp(G_TP_NONE),
+    gsDPSetAlphaCompare(G_AC_NONE), // disable threshold for smooth RGBA
+    gsDPSetRenderMode(G_RM_XLU_SURF, G_RM_XLU_SURF2), // transparent sprites
     gsDPSetTextureFilter(G_TF_POINT),
     gsSPEndDisplayList(),
 };

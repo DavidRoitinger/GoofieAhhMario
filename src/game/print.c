@@ -363,7 +363,8 @@ s32 char_to_glyph_index(char c) {
  * Adds an individual glyph to be rendered.
  */
 void add_glyph_texture(s8 glyphIndex) {
-    const Texture *const *glyphs = segmented_to_virtual(main_hud_lut);
+    // ----- EDIT
+    const Texture *const *glyphs = segmented_to_virtual(goof_font);
 
     gDPPipeSync(gDisplayListHead++);
     gDPSetTextureImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, glyphs[glyphIndex]);
@@ -428,10 +429,6 @@ void render_text_labels(void) {
 
     mtx = alloc_display_list(sizeof(*mtx));
 
-    if (mtx == NULL) {
-        sTextLabelsCount = 0;
-        return;
-    }
 
     guOrtho(mtx, 0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, -10.0f, 10.0f, 1.0f);
     gSPPerspNormalize((Gfx *) (gDisplayListHead++), 0xFFFF);

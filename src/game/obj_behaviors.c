@@ -778,3 +778,4 @@ UNUSED s32 debug_sequence_tracker(s16 debugInputSequence[]) {
 // ----- EDIT
 
 #include "behaviors/spinning_platform.inc.c"
+#include "behaviors/warp_custom.inc.c"
