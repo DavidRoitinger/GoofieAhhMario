@@ -632,6 +632,18 @@ s32 grid[10][10][10] = {
     {
         {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
         {11, 10, 10, 10, 11, 14, 10, 14, 10, 11},
+        {11, 10, 10, 10, 11, 10, 11, 11, 13, 11},
+        {11, 12, 10, 10, 13, 10, 10, 10, 10, 11},
+        {11, 10, 10, 10, 10, 11, 14, 11, 13, 11},
+        {11, 10, 14, 10, 12, 11, 10, 13, 10, 11},
+        {11, 14, 10, 12, 10, 11, 14, 11, 11, 11},
+        {11, 10, 10, 10, 10, 11, 10, 10, 14, 11},
+        {11, 13, 10, 14, 10, 13, 10, 13, 10, 11},
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+    },
+    {
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11},
+        {11, 10, 10, 10, 11, 14, 10, 14, 10, 11},
         {11, 10, 11, 10, 11, 10, 11, 11, 13, 11},
         {11, 12, 10, 10, 13, 10, 10, 10, 10, 11},
         {11, 11, 11, 11, 10, 11, 14, 11, 13, 11},
@@ -668,7 +680,7 @@ s32 grid[10][10][10] = {
 
 };
 
-s32 layer = 1;
+s32 layer = 0;
 
 const s32 MAP_SIZE = 10;
 const s32 WALL = 11;
@@ -692,11 +704,11 @@ const s32 NUM_RAYS = FOV / SLICE_SIZE;
 const s32 COLUMN_WIDTH = WIDTH / (f32) NUM_RAYS;
 
 
-const s32 posStackSize = 32;
-struct Pos posStack[32];
+const s32 posStackSize = 16;
+struct Pos posStack[16];
 s32 posStackIndex = 0;
 
-const s32 MAX_RAYCAST_DEPTH = 32;
+const s32 MAX_RAYCAST_DEPTH = 3;
 
 
 f32 angleInDegrees = 0.0f;
@@ -784,8 +796,8 @@ void allocate_area(){
     {
     case OVERWORLD:
         handle_stick_movement(&player, MOVE_SPEED);
-        // draw_3d_render();
-        draw_render_demo();
+        draw_3d_render();
+        //draw_render_demo();
         break;
 
     case COMBAT:
@@ -932,7 +944,7 @@ void combat_area(){
     }
     
     
-    render_tile(WIDTH/2-8, HEIGHT/3);
+    render_tile_tinted(WIDTH/2-8, HEIGHT/3);
     gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
     print_text_centered(WIDTH/2, HEIGHT-50, enemy.name);
@@ -1128,6 +1140,7 @@ void draw_ui_text_options(s32 x, s32 y, char options[][24], s32 selected, s32 co
 
 
 void draw_3d_render(){
+
     for (s32 i = 0; i < FOV / SLICE_SIZE; i++){
         s32 angle = player.angleInDegrees + FOV/-2 + (i * SLICE_SIZE);
 	    castRay(player.pos, angle, grid[layer], &ray, i);
@@ -1267,7 +1280,7 @@ void render_tile(s32 x, s32 y) {
     rectX = rectBaseX;
     rectY = rectBaseY;
     gSPScisTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + 16) << 2,
-                        (rectY + 16) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+                        (rectY + 16) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
 }
 
 void render_tile_sized(s32 x, s32 y, s32 xSize, s32 ySize) {
@@ -1289,6 +1302,18 @@ void render_tile_cords(s32 x, s32 y, s32 x2, s32 y2) {
 
     gSPScisTextureRectangle(gDisplayListHead++, x << 2, y << 2, (x2) << 2,
                         (y2) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 4 << 10);
+}
+
+void render_tile_tinted(s32 x, s32 y) {
+    s32 rectBaseX = x;
+    s32 rectBaseY = y;
+    s32 rectX;
+    s32 rectY;
+
+    rectX = rectBaseX;
+    rectY = rectBaseY;
+    gSPScisTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + 16) << 2,
+                        (rectY + 16) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
 }
 
 
@@ -1386,6 +1411,8 @@ void draw_floor_tile(f32 distance, f32 angleInDegrees, s32 texture, s32 i){
 
     f32 wallOffset = HEIGHT / 2.0f - wallHeight / 2.0f;
 
+    // Uncomment to toggle floorrendering...
+
     // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
     // add_texture(texture);
     // render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
@@ -1393,18 +1420,19 @@ void draw_floor_tile(f32 distance, f32 angleInDegrees, s32 texture, s32 i){
 
 
 
-    // gSPDisplayList(gDisplayListHead++, dl_hud_img_begin_tinted);
-    // add_texture(texture);
-    // gDPSetCombineMode(gDisplayListHead++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin_tinted);
+    add_texture(texture);
+    gDPSetCombineMode(gDisplayListHead++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
 
 
-    // s32 brightness = 255 - (s32)floor((distance * 1.5) - 1);
+    s32 brightness = 255 - (s32)floor((distance * 6) - 1);
     
+    if (brightness < 0) brightness = 0;
     
-    // gDPSetPrimColor(gDisplayListHead++, 0, 0, brightness, brightness, brightness, 255);
+    gDPSetPrimColor(gDisplayListHead++, 0, 0, brightness, brightness, brightness, 255);
 
-    // render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
-    // gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+    render_tile_sized((COLUMN_WIDTH ) * i, wallOffset, COLUMN_WIDTH, wallHeight);
+    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
 
     sprite_count++;
     
@@ -1430,8 +1458,8 @@ f32 floor(f32 f){
 }
 
 
-
-
+//TODO: Fix Visual Bug with occurs a coloured tile is on the edge of the render distance
+//TODO: Try if increasing the render distance is possible
 void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE], struct Ray *ray, s32 slice_index){
     ray_count++;
     s16 angle = degrees_to_angle(angleInDegrees);
@@ -1440,6 +1468,7 @@ void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE]
     Bool8 hit = FALSE;
     s32 vdof = 0, hdof = 0;
 
+    // Could be optimised:/...
     draw_floor_tile(1.0f, angleInDegrees, 
             grid[(int)(start[1] / 16)][(int)(start[0] / 16)], slice_index);
 
@@ -1545,7 +1574,7 @@ void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE]
         hRayPos[1] += offset[1];
     }
 
-    selectionSort(posStack, 32);
+    selectionSort(posStack, posStackSize);
 
     for (s32 i = 0; i <= posStackIndex; i++)
     {
@@ -1561,8 +1590,6 @@ void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE]
         //     grid[posStack[0].y][posStack[0].x], slice_index);
         // draw_floor_tile(posStack[1].dist, player.angleInDegrees, 
         //     grid[posStack[1].y][posStack[1].x], slice_index);
-
-    
 
     if (hdist < vdist){
         ray->hitPosition[0] = hRayPos[0];

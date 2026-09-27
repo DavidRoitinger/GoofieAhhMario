@@ -130,6 +130,8 @@ void render_tile(s32 x, s32 y);
 void render_tile_sized(s32 x, s32 y, s32 xSize, s32 ySize);
 void render_tile_cords(s32 x, s32 y, s32 x2, s32 y2);
 
+void render_tile_tinted(s32 x, s32 y);
+
 void move_tile(Vec3f *pos, Vec3f targetPos, f32 velocity);
 void handle_stick_movement(struct Entity *entity, f32 velocity);
 
