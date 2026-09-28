@@ -1474,7 +1474,7 @@ void castRay(Vec3f start, f32 angleInDegrees, const s32 grid[MAP_SIZE][MAP_SIZE]
 
     posStackIndex = 0;
 
-    for (s32 i = 0; i < 32; i++) {
+    for (s32 i = 0; i < 16; i++) {
         posStack[i].hit = FALSE;
         posStack[i].dist = (float) S32_MAX;
         posStack[i].x = 0;
